@@ -119,6 +119,7 @@ CREATE TABLE avaliacao (
     data DATE DEFAULT CURRENT_DATE,
     resenha TEXT,
     nota NUMERIC(4, 2) NOT NULL,
+    reassistido BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (id_usuario, id_obra),
     CONSTRAINT fk_avaliacao_usuario FOREIGN KEY (id_usuario) 
         REFERENCES usuario(id) ON DELETE CASCADE,
