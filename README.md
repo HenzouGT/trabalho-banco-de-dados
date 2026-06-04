@@ -1,4 +1,4 @@
-# Trabalho Bando de Dados
+# Trabalho Banco de Dados
 Repositório para o trabalho da disciplina Banco de Dados 2026/1
 
 Integrantes:
