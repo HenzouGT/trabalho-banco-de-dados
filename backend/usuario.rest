@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:3000
+@usuarioId = troque-pelo-id-do-usuario
+
+### Listar usuarios
+GET {{baseUrl}}/usuario
+
+### Buscar usuario por id
+GET {{baseUrl}}/usuario/{{usuarioId}}
+
+### Criar usuario
+POST {{baseUrl}}/usuario
+Content-Type: application/json
+
+{
+  "nome": "Usuario Teste",
+  "email": "usuario.teste@example.com",
+  "hash_senha": "hash_de_teste",
+  "bio": "Bio de teste",
+  "avatar": "https://example.com/avatar.png"
+}
+
+### Atualizar usuario
+PATCH {{baseUrl}}/usuario/{{usuarioId}}
+Content-Type: application/json
+
+{
+  "nome": "Usuario Teste Atualizado",
+  "bio": "Bio atualizada"
+}
+
+### Remover usuario
+DELETE {{baseUrl}}/usuario/{{usuarioId}}
