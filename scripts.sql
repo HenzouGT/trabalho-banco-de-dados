@@ -66,7 +66,7 @@ CREATE TYPE tipo_arte AS ENUM (
 
 CREATE TABLE arte (
     id VARCHAR(36) PRIMARY KEY,
-    tipo_arte tipo_arte NOT NULL
+    tipo_arte tipo_arte NOT NULL,
     link TEXT NOT NULL,             -- link para o MinIO
     data DATE DEFAULT CURRENT_DATE,
     id_usuario VARCHAR(36) NOT NULL,
@@ -161,7 +161,7 @@ CREATE TYPE funcao_artista AS ENUM (
 CREATE TABLE obra_artista (
     id_obra VARCHAR(36),
     id_artista VARCHAR(36),
-    funcao funcao_artista NOT NULL
+    funcao funcao_artista NOT NULL,
     PRIMARY KEY (id_obra, id_artista, funcao),
     CONSTRAINT fk_obra_artista_obra FOREIGN KEY (id_obra) 
         REFERENCES obra(id) ON DELETE CASCADE,
