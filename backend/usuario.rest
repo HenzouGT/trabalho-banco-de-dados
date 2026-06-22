@@ -14,9 +14,18 @@ Content-Type: application/json
 {
   "nome": "Usuario Teste",
   "email": "usuario.teste@example.com",
-  "hash_senha": "hash_de_teste",
+  "senha": "senha_de_teste",
   "bio": "Bio de teste",
   "avatar": "https://example.com/avatar.png"
+}
+
+### Login simples
+POST {{baseUrl}}/usuario/login
+Content-Type: application/json
+
+{
+  "email": "usuario.teste@example.com",
+  "senha": "senha_de_teste"
 }
 
 ### Atualizar usuario
