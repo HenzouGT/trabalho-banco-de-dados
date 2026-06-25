@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 
 type Usuario = {
   id: string;
@@ -323,6 +324,32 @@ export default function Home() {
                 O usuario ativo ja esta salvo no navegador. As proximas telas de
                 filmes, usuarios e avaliacoes podem reutilizar esta sessao local.
               </p>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/filmes"
+                  className="inline-flex h-11 items-center rounded-md bg-[#23395b] px-5 text-sm font-semibold text-white transition hover:bg-[#172844]"
+                >
+                  Gerenciar filmes
+                </Link>
+                <Link
+                  href="/avaliacoes"
+                  className="inline-flex h-11 items-center rounded-md border border-[#b8b0a3] px-5 text-sm font-semibold text-[#172026] transition hover:border-[#172026] hover:bg-[#f8f6f2]"
+                >
+                  Avaliar filmes
+                </Link>
+                <Link
+                  href="/artistas"
+                  className="inline-flex h-11 items-center rounded-md border border-[#b8b0a3] px-5 text-sm font-semibold text-[#172026] transition hover:border-[#172026] hover:bg-[#f8f6f2]"
+                >
+                  Gerenciar artistas
+                </Link>
+                <Link
+                  href="/generos"
+                  className="inline-flex h-11 items-center rounded-md border border-[#b8b0a3] px-5 text-sm font-semibold text-[#172026] transition hover:border-[#172026] hover:bg-[#f8f6f2]"
+                >
+                  Gerenciar generos
+                </Link>
+              </div>
             </section>
           </section>
         </section>
