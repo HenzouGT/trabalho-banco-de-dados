@@ -9,6 +9,7 @@ type Usuario = {
   email: string;
   bio?: string | null;
   avatar?: string | null;
+  funcao?: "ADMIN" | "CLIENTE" | null;
 };
 
 type UsuarioAtivo = Usuario;
@@ -302,6 +303,9 @@ export default function Home() {
                   <p className="truncate text-sm text-[#52616b]">
                     {usuarioAtivo.email}
                   </p>
+                  <p className="mt-2 inline-flex rounded-md bg-[#f8f6f2] px-2 py-1 text-xs font-semibold text-[#52616b]">
+                    {usuarioAtivo.funcao ?? "CLIENTE"}
+                  </p>
                 </div>
               </div>
 
@@ -321,13 +325,19 @@ export default function Home() {
                 Area inicial
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[#52616b]">
-                O usuario ativo ja esta salvo no navegador. As proximas telas de
-                filmes, usuarios e avaliacoes podem reutilizar esta sessao local.
+                O usuario ativo ja esta salvo no navegador. As telas de filmes,
+                avaliacoes e tabelas podem reutilizar esta sessao local.
               </p>
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/filmes"
+                  href="/tabelas"
                   className="inline-flex h-11 items-center rounded-md bg-[#23395b] px-5 text-sm font-semibold text-white transition hover:bg-[#172844]"
+                >
+                  Gerenciar tabelas
+                </Link>
+                <Link
+                  href="/filmes"
+                  className="inline-flex h-11 items-center rounded-md border border-[#b8b0a3] px-5 text-sm font-semibold text-[#172026] transition hover:border-[#172026] hover:bg-[#f8f6f2]"
                 >
                   Gerenciar filmes
                 </Link>

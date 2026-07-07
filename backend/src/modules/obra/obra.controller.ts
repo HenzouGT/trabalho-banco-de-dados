@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -25,8 +26,11 @@ export class ObraController {
   }
 
   @Post()
-  create(@Body() createObraDto: CreateObraDto) {
-    return this.obraService.create(createObraDto);
+  create(
+    @Body() createObraDto: CreateObraDto,
+    @Headers('x-usuario-id') usuarioId?: string,
+  ) {
+    return this.obraService.create(createObraDto, usuarioId);
   }
 
   @Patch(':id')

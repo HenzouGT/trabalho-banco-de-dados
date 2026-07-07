@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -27,8 +28,11 @@ export class UsuarioController {
   }
 
   @Post()
-  create(@Body() createUsuarioDto: CreateUsuarioDto) {
-    return this.usuarioService.create(createUsuarioDto);
+  create(
+    @Body() createUsuarioDto: CreateUsuarioDto,
+    @Headers('x-usuario-id') usuarioId?: string,
+  ) {
+    return this.usuarioService.create(createUsuarioDto, usuarioId);
   }
 
   @Post('login')
@@ -37,8 +41,12 @@ export class UsuarioController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto) {
-    return this.usuarioService.update(id, updateUsuarioDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateUsuarioDto: UpdateUsuarioDto,
+    @Headers('x-usuario-id') usuarioId?: string,
+  ) {
+    return this.usuarioService.update(id, updateUsuarioDto, usuarioId);
   }
 
   @Delete(':id')

@@ -21,7 +21,12 @@ export class ObraGeneroService extends SupabaseCrudService {
     );
   }
 
-  create(createObraGeneroDto: CreateObraGeneroDto) {
+  async create(
+    createObraGeneroDto: CreateObraGeneroDto,
+    usuarioAdminId?: string,
+  ) {
+    await this.assertAdmin(usuarioAdminId);
+
     return this.createIn('obra_genero', createObraGeneroDto);
   }
 

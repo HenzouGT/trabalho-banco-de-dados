@@ -7,7 +7,14 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from "react";
+import {
+  lerUsuarioAtivo,
+  montarHeadersJson,
+  observarUsuarioAtivo,
+  usuarioEhAdmin,
+} from "../lib/usuario-ativo";
 
 type Artista = {
   id: string;
@@ -85,6 +92,11 @@ function obterIniciais(nome: string) {
 }
 
 export default function ArtistasPage() {
+  const usuarioAtivo = useSyncExternalStore(
+    observarUsuarioAtivo,
+    lerUsuarioAtivo,
+    () => null,
+  );
   const [artistas, setArtistas] = useState<Artista[]>([]);
   const [formulario, setFormulario] = useState<ArtistaForm>(ARTISTA_VAZIO);
   const [artistaEditandoId, setArtistaEditandoId] = useState<string | null>(
@@ -101,6 +113,7 @@ export default function ArtistasPage() {
       artistas.find((artista) => artista.id === artistaEditandoId) ?? null,
     [artistaEditandoId, artistas],
   );
+  const usuarioAdministrador = usuarioEhAdmin(usuarioAtivo);
 
   const carregarArtistas = useCallback(async () => {
     setCarregandoLista(true);
@@ -175,6 +188,11 @@ export default function ArtistasPage() {
     setErro("");
     setMensagem("");
 
+    if (!artistaEditandoId && !usuarioAdministrador) {
+      setErro("Apenas usuarios ADMIN podem cadastrar artistas.");
+      return;
+    }
+
     let payload: ArtistaPayload;
 
     try {
@@ -193,10 +211,7 @@ export default function ArtistasPage() {
           : "/api/artista",
         {
           method: artistaEditandoId ? "PATCH" : "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+          headers: montarHeadersJson(usuarioAtivo),
           body: JSON.stringify(payload),
         },
       );
@@ -373,6 +388,12 @@ export default function ArtistasPage() {
                 </p>
               ) : null}
 
+              {!artistaEditando && !usuarioAdministrador ? (
+                <p className="rounded-md border border-[#e4ded4] bg-[#f8f6f2] px-3 py-2 text-xs leading-5 text-[#52616b]">
+                  Entre com um usuario ADMIN para cadastrar novos artistas.
+                </p>
+              ) : null}
+
               {mensagem ? (
                 <p className="rounded-md border border-[#b9d8c2] bg-[#f0fff4] px-3 py-2 text-sm text-[#1f6b35]">
                   {mensagem}
@@ -382,7 +403,9 @@ export default function ArtistasPage() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button
                   type="submit"
-                  disabled={salvando}
+                  disabled={
+                    salvando || (!artistaEditando && !usuarioAdministrador)
+                  }
                   className="h-11 rounded-md bg-[#23395b] px-5 text-sm font-semibold text-white transition hover:bg-[#172844] disabled:cursor-not-allowed disabled:bg-[#8a96a8]"
                 >
                   {salvando

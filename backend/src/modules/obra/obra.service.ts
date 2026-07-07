@@ -18,7 +18,9 @@ export class ObraService extends SupabaseCrudService {
     return this.findOneFrom('obra', { id }, 'Obra nao encontrada');
   }
 
-  create(createObraDto: CreateObraDto) {
+  async create(createObraDto: CreateObraDto, usuarioAdminId?: string) {
+    await this.assertAdmin(usuarioAdminId);
+
     return this.createIn('obra', {
       id: randomUUID(),
       ...createObraDto,

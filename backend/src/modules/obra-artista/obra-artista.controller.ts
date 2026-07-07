@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -33,8 +34,11 @@ export class ObraArtistaController {
   }
 
   @Post()
-  create(@Body() createObraArtistaDto: CreateObraArtistaDto) {
-    return this.obraArtistaService.create(createObraArtistaDto);
+  create(
+    @Body() createObraArtistaDto: CreateObraArtistaDto,
+    @Headers('x-usuario-id') usuarioId?: string,
+  ) {
+    return this.obraArtistaService.create(createObraArtistaDto, usuarioId);
   }
 
   @Patch(':id_obra/:id_artista/:funcao')

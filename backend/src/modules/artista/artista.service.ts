@@ -18,7 +18,9 @@ export class ArtistaService extends SupabaseCrudService {
     return this.findOneFrom('artista', { id }, 'Artista nao encontrado');
   }
 
-  create(createArtistaDto: CreateArtistaDto) {
+  async create(createArtistaDto: CreateArtistaDto, usuarioAdminId?: string) {
+    await this.assertAdmin(usuarioAdminId);
+
     return this.createIn('artista', {
       id: randomUUID(),
       ...createArtistaDto,

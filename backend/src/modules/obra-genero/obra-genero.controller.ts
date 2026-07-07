@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { CreateObraGeneroDto } from './dto/obra-genero.dto';
 import { ObraGeneroService } from './obra-genero.service';
 
@@ -20,8 +28,11 @@ export class ObraGeneroController {
   }
 
   @Post()
-  create(@Body() createObraGeneroDto: CreateObraGeneroDto) {
-    return this.obraGeneroService.create(createObraGeneroDto);
+  create(
+    @Body() createObraGeneroDto: CreateObraGeneroDto,
+    @Headers('x-usuario-id') usuarioId?: string,
+  ) {
+    return this.obraGeneroService.create(createObraGeneroDto, usuarioId);
   }
 
   @Delete(':id_obra/:id_genero')

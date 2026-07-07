@@ -1,7 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import {
+  lerUsuarioAtivo,
+  montarHeadersJson,
+  observarUsuarioAtivo,
+  usuarioEhAdmin,
+} from "../lib/usuario-ativo";
 
 type Filme = {
   id: string;
@@ -170,6 +183,11 @@ function montarUrlObraGenero(idObra: string, idGenero: string) {
 }
 
 export default function FilmesPage() {
+  const usuarioAtivo = useSyncExternalStore(
+    observarUsuarioAtivo,
+    lerUsuarioAtivo,
+    () => null,
+  );
   const [filmes, setFilmes] = useState<Filme[]>([]);
   const [artistas, setArtistas] = useState<Artista[]>([]);
   const [generos, setGeneros] = useState<Genero[]>([]);
@@ -195,6 +213,7 @@ export default function FilmesPage() {
     () => filmes.find((filme) => filme.id === filmeEditandoId) ?? null,
     [filmeEditandoId, filmes],
   );
+  const usuarioAdministrador = usuarioEhAdmin(usuarioAtivo);
 
   const carregarFilmes = useCallback(async () => {
     setCarregandoLista(true);
@@ -392,6 +411,11 @@ export default function FilmesPage() {
     setErro("");
     setMensagem("");
 
+    if (!usuarioAdministrador) {
+      setErro("Apenas usuarios ADMIN podem inserir artistas em obras.");
+      return;
+    }
+
     if (!artistaSelecionadoId) {
       setErro("Selecione um artista para adicionar ao filme.");
       return;
@@ -434,6 +458,11 @@ export default function FilmesPage() {
   function adicionarGeneroAoFormulario() {
     setErro("");
     setMensagem("");
+
+    if (!usuarioAdministrador) {
+      setErro("Apenas usuarios ADMIN podem inserir generos em obras.");
+      return;
+    }
 
     if (!generoSelecionadoId) {
       setErro("Selecione um genero para adicionar ao filme.");
@@ -482,14 +511,15 @@ export default function FilmesPage() {
       (relacao) => !chavesDesejadas.has(chaveObraArtista(relacao)),
     );
 
+    if (relacoesParaCriar.length > 0 && !usuarioAdministrador) {
+      throw new Error("Apenas usuarios ADMIN podem inserir artistas em obras.");
+    }
+
     const respostas = await Promise.all([
       ...relacoesParaCriar.map((relacao) =>
         fetch("/api/obra_artista", {
           method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+          headers: montarHeadersJson(usuarioAtivo),
           body: JSON.stringify({
             id_obra: idObra,
             id_artista: relacao.id_artista,
@@ -541,14 +571,15 @@ export default function FilmesPage() {
       (relacao) => !generosDesejados.has(relacao.id_genero),
     );
 
+    if (generosParaCriar.length > 0 && !usuarioAdministrador) {
+      throw new Error("Apenas usuarios ADMIN podem inserir generos em obras.");
+    }
+
     const respostas = await Promise.all([
       ...generosParaCriar.map((idGenero) =>
         fetch("/api/obra_genero", {
           method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+          headers: montarHeadersJson(usuarioAtivo),
           body: JSON.stringify({
             id_obra: idObra,
             id_genero: idGenero,
@@ -582,6 +613,11 @@ export default function FilmesPage() {
     setErro("");
     setMensagem("");
 
+    if (!filmeEditandoId && !usuarioAdministrador) {
+      setErro("Apenas usuarios ADMIN podem cadastrar obras.");
+      return;
+    }
+
     let payload: FilmePayload;
 
     try {
@@ -598,10 +634,7 @@ export default function FilmesPage() {
         filmeEditandoId ? `/api/obra/${filmeEditandoId}` : "/api/obra",
         {
           method: filmeEditandoId ? "PATCH" : "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+          headers: montarHeadersJson(usuarioAtivo),
           body: JSON.stringify(payload),
         },
       );
@@ -727,6 +760,11 @@ export default function FilmesPage() {
               <p className="mt-2 text-sm leading-6 text-[#52616b]">
                 O backend recebera este registro como uma obra do tipo Filme.
               </p>
+              {!filmeEditando && !usuarioAdministrador ? (
+                <p className="mt-3 rounded-md border border-[#e4ded4] bg-[#f8f6f2] px-3 py-2 text-xs leading-5 text-[#52616b]">
+                  Entre com um usuario ADMIN para cadastrar novas obras.
+                </p>
+              ) : null}
             </div>
 
             <div className="mt-5 flex flex-col gap-4">
@@ -851,7 +889,8 @@ export default function FilmesPage() {
                     <button
                       type="button"
                       onClick={adicionarArtistaAoFormulario}
-                      className="w-60 self-end rounded-md bg-[#23395b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#172844]"
+                      disabled={!usuarioAdministrador}
+                      className="w-60 self-end rounded-md bg-[#23395b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#172844] disabled:cursor-not-allowed disabled:bg-[#8a96a8]"
                     >
                       Adicionar
                     </button>
@@ -933,7 +972,8 @@ export default function FilmesPage() {
                     <button
                       type="button"
                       onClick={adicionarGeneroAoFormulario}
-                      className="w-60 self-end rounded-md bg-[#23395b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#172844]"
+                      disabled={!usuarioAdministrador}
+                      className="w-60 self-end rounded-md bg-[#23395b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#172844] disabled:cursor-not-allowed disabled:bg-[#8a96a8]"
                     >
                       Adicionar
                     </button>
@@ -982,7 +1022,9 @@ export default function FilmesPage() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button
                   type="submit"
-                  disabled={salvando}
+                  disabled={
+                    salvando || (!filmeEditando && !usuarioAdministrador)
+                  }
                   className="h-11 rounded-md bg-[#23395b] px-5 text-sm font-semibold text-white transition hover:bg-[#172844] disabled:cursor-not-allowed disabled:bg-[#8a96a8]"
                 >
                   {salvando

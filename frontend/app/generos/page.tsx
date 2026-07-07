@@ -1,7 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import {
+  lerUsuarioAtivo,
+  montarHeadersJson,
+  observarUsuarioAtivo,
+  usuarioEhAdmin,
+} from "../lib/usuario-ativo";
 
 type Genero = {
   id: string;
@@ -50,6 +63,11 @@ function montarPayload(nomeGenero: string): GeneroPayload {
 }
 
 export default function GenerosPage() {
+  const usuarioAtivo = useSyncExternalStore(
+    observarUsuarioAtivo,
+    lerUsuarioAtivo,
+    () => null,
+  );
   const [generos, setGeneros] = useState<Genero[]>([]);
   const [nome, setNome] = useState(GENERO_VAZIO);
   const [generoEditandoId, setGeneroEditandoId] = useState<string | null>(null);
@@ -63,6 +81,7 @@ export default function GenerosPage() {
     () => generos.find((genero) => genero.id === generoEditandoId) ?? null,
     [generoEditandoId, generos],
   );
+  const usuarioAdministrador = usuarioEhAdmin(usuarioAtivo);
 
   const carregarGeneros = useCallback(async () => {
     setCarregandoLista(true);
@@ -127,6 +146,11 @@ export default function GenerosPage() {
     setErro("");
     setMensagem("");
 
+    if (!generoEditandoId && !usuarioAdministrador) {
+      setErro("Apenas usuarios ADMIN podem cadastrar generos.");
+      return;
+    }
+
     let payload: GeneroPayload;
 
     try {
@@ -143,10 +167,7 @@ export default function GenerosPage() {
         generoEditandoId ? `/api/genero/${generoEditandoId}` : "/api/genero",
         {
           method: generoEditandoId ? "PATCH" : "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+          headers: montarHeadersJson(usuarioAtivo),
           body: JSON.stringify(payload),
         },
       );
@@ -286,6 +307,12 @@ export default function GenerosPage() {
                 </p>
               ) : null}
 
+              {!generoEditando && !usuarioAdministrador ? (
+                <p className="rounded-md border border-[#e4ded4] bg-[#f8f6f2] px-3 py-2 text-xs leading-5 text-[#52616b]">
+                  Entre com um usuario ADMIN para cadastrar novos generos.
+                </p>
+              ) : null}
+
               {mensagem ? (
                 <p className="rounded-md border border-[#b9d8c2] bg-[#f0fff4] px-3 py-2 text-sm text-[#1f6b35]">
                   {mensagem}
@@ -295,7 +322,9 @@ export default function GenerosPage() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button
                   type="submit"
-                  disabled={salvando}
+                  disabled={
+                    salvando || (!generoEditando && !usuarioAdministrador)
+                  }
                   className="h-11 rounded-md bg-[#23395b] px-5 text-sm font-semibold text-white transition hover:bg-[#172844] disabled:cursor-not-allowed disabled:bg-[#8a96a8]"
                 >
                   {salvando

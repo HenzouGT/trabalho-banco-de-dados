@@ -2,13 +2,19 @@
 -- 1. TABELAS PRINCIPAIS (ENTIDADES)
 -- ============================================================================
 
+CREATE TYPE funcao_usuario AS ENUM (
+    'ADMIN',
+    'CLIENTE'
+);
+
 CREATE TABLE usuario (
     id VARCHAR(36) PRIMARY KEY,
     nome VARCHAR(128) NOT NULL,
     bio TEXT,
     email VARCHAR(128) NOT NULL UNIQUE,
     hash_senha VARCHAR(60) NOT NULL,
-    avatar TEXT     -- link para o MinIO
+    avatar TEXT,     -- link para o MinIO
+    funcao funcao_usuario NOT NULL DEFAULT 'CLIENTE'
 );
 
 CREATE TYPE tipo_obra AS ENUM (

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -25,8 +26,11 @@ export class ArtistaController {
   }
 
   @Post()
-  create(@Body() createArtistaDto: CreateArtistaDto) {
-    return this.artistaService.create(createArtistaDto);
+  create(
+    @Body() createArtistaDto: CreateArtistaDto,
+    @Headers('x-usuario-id') usuarioId?: string,
+  ) {
+    return this.artistaService.create(createArtistaDto, usuarioId);
   }
 
   @Patch(':id')

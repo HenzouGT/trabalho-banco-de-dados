@@ -16,6 +16,7 @@ type UsuarioAtivo = {
   email: string;
   bio?: string | null;
   avatar?: string | null;
+  funcao?: "ADMIN" | "CLIENTE" | null;
 };
 
 type Filme = {

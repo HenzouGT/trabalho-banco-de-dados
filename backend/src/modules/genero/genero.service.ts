@@ -18,7 +18,9 @@ export class GeneroService extends SupabaseCrudService {
     return this.findOneFrom('genero', { id }, 'Genero nao encontrado');
   }
 
-  create(createGeneroDto: CreateGeneroDto) {
+  async create(createGeneroDto: CreateGeneroDto, usuarioAdminId?: string) {
+    await this.assertAdmin(usuarioAdminId);
+
     return this.createIn('genero', {
       id: randomUUID(),
       ...createGeneroDto,

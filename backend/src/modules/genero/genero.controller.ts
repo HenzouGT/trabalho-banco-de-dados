@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -25,8 +26,11 @@ export class GeneroController {
   }
 
   @Post()
-  create(@Body() createGeneroDto: CreateGeneroDto) {
-    return this.generoService.create(createGeneroDto);
+  create(
+    @Body() createGeneroDto: CreateGeneroDto,
+    @Headers('x-usuario-id') usuarioId?: string,
+  ) {
+    return this.generoService.create(createGeneroDto, usuarioId);
   }
 
   @Patch(':id')

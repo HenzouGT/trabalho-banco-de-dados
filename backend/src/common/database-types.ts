@@ -6,6 +6,8 @@ export type TipoObra =
   | 'Curta-metragem'
   | 'Animação';
 
+export type FuncaoUsuario = 'ADMIN' | 'CLIENTE';
+
 export type TipoArte =
   | 'Pôster'
   | 'Fanart'

@@ -25,7 +25,12 @@ export class ObraArtistaService extends SupabaseCrudService {
     );
   }
 
-  create(createObraArtistaDto: CreateObraArtistaDto) {
+  async create(
+    createObraArtistaDto: CreateObraArtistaDto,
+    usuarioAdminId?: string,
+  ) {
+    await this.assertAdmin(usuarioAdminId);
+
     return this.createIn('obra_artista', createObraArtistaDto);
   }
 

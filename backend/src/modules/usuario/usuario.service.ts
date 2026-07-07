@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { randomBytes, randomUUID, scrypt, timingSafeEqual } from 'crypto';
 import { promisify } from 'util';
+import type { FuncaoUsuario } from '../../common/database-types';
 import { SupabaseCrudService } from '../../common/supabase-crud.service';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
@@ -22,6 +23,7 @@ type UsuarioRecord = {
   hash_senha: string;
   bio?: string | null;
   avatar?: string | null;
+  funcao: FuncaoUsuario;
 };
 
 type UsuarioPublico = Omit<UsuarioRecord, 'hash_senha'>;
@@ -50,11 +52,15 @@ export class UsuarioService extends SupabaseCrudService {
     return this.toUsuarioPublico(usuario);
   }
 
-  async create(createUsuarioDto: CreateUsuarioDto) {
-    const { senha, ...usuarioDto } = createUsuarioDto;
+  async create(createUsuarioDto: CreateUsuarioDto, usuarioAdminId?: string) {
+    const { senha, funcao, ...usuarioDto } = createUsuarioDto;
 
     if (!senha) {
       throw new BadRequestException('Senha obrigatoria');
+    }
+
+    if (funcao !== undefined) {
+      await this.assertAdmin(usuarioAdminId);
     }
 
     const usuario = (await this.createIn('usuario', {
@@ -62,13 +68,18 @@ export class UsuarioService extends SupabaseCrudService {
       ...usuarioDto,
       email: this.normalizarEmail(usuarioDto.email),
       hash_senha: await this.hashSenha(senha),
+      ...(funcao !== undefined ? { funcao } : {}),
     })) as UsuarioRecord;
 
     return this.toUsuarioPublico(usuario);
   }
 
-  async update(id: string, updateUsuarioDto: UpdateUsuarioDto) {
-    const { senha, ...usuarioDto } = updateUsuarioDto;
+  async update(
+    id: string,
+    updateUsuarioDto: UpdateUsuarioDto,
+    usuarioAdminId?: string,
+  ) {
+    const { senha, funcao, ...usuarioDto } = updateUsuarioDto;
     const payload: Record<string, unknown> = { ...usuarioDto };
 
     if (usuarioDto.email !== undefined) {
@@ -81,6 +92,11 @@ export class UsuarioService extends SupabaseCrudService {
       }
 
       payload.hash_senha = await this.hashSenha(senha);
+    }
+
+    if (funcao !== undefined) {
+      await this.assertAdmin(usuarioAdminId);
+      payload.funcao = funcao;
     }
 
     const usuario = (await this.updateIn(
@@ -186,6 +202,7 @@ export class UsuarioService extends SupabaseCrudService {
       email: usuario.email,
       bio: usuario.bio,
       avatar: usuario.avatar,
+      funcao: usuario.funcao,
     };
   }
 }

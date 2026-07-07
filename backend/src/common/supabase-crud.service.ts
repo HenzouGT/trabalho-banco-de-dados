@@ -3,7 +3,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 
 type FilterValue = string | number | boolean;
@@ -11,6 +15,28 @@ type Filters = Record<string, FilterValue>;
 
 export abstract class SupabaseCrudService {
   constructor(protected readonly supabaseService: SupabaseService) {}
+
+  protected async assertAdmin(usuarioId?: string) {
+    if (!usuarioId) {
+      throw new ForbiddenException(
+        'Apenas usuarios ADMIN podem realizar esta operacao',
+      );
+    }
+
+    const { data, error } = await this.supabase
+      .from('usuario')
+      .select('funcao')
+      .eq('id', usuarioId)
+      .maybeSingle();
+
+    this.handleError(error);
+
+    if (!data || data.funcao !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Apenas usuarios ADMIN podem realizar esta operacao',
+      );
+    }
+  }
 
   protected async findAllFrom(table: string, orderBy?: string) {
     let query = this.supabase.from(table).select('*');
