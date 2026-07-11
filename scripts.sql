@@ -47,6 +47,20 @@ CREATE TABLE genero (
     nome VARCHAR(50) NOT NULL UNIQUE
 );
 
+CREATE TYPE tipo_chat AS ENUM (
+    'PRIVADO',
+    'GRUPO'
+);
+
+CREATE TABLE chat (
+    id VARCHAR(36) PRIMARY KEY,
+    tipo_chat tipo_chat NOT NULL DEFAULT 'PRIVADO',
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_criador VARCHAR(36) NOT NULL, 
+    CONSTRAINT fk_chat_criador FOREIGN KEY (id_criador) 
+        REFERENCES usuario(id) ON DELETE CASCADE
+);
+
 -- ============================================================================
 -- 2. TABELAS COM DEPENDÊNCIAS DE ENTIDADES (1:N)
 -- ============================================================================
@@ -183,4 +197,24 @@ CREATE TABLE obra_genero (
         REFERENCES obra(id) ON DELETE CASCADE,
     CONSTRAINT fk_obra_genero_genero FOREIGN KEY (id_genero) 
         REFERENCES genero(id) ON DELETE CASCADE
+);
+
+CREATE TABLE participante_chat (
+    id_chat VARCHAR(36),
+    id_usuario VARCHAR(36),
+    data_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_chat, id_usuario),
+    CONSTRAINT fk_participante_chat FOREIGN KEY (id_chat) REFERENCES chat(id) ON DELETE CASCADE,
+    CONSTRAINT fk_participante_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE CASCADE
+);
+
+CREATE TABLE mensagem (
+    id VARCHAR(36) PRIMARY KEY,
+    id_chat VARCHAR(36) NOT NULL,
+    id_remetente VARCHAR(36) NOT NULL,
+    texto TEXT NOT NULL,
+    lida BOOLEAN DEFAULT FALSE,
+    data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mensagem_chat FOREIGN KEY (id_chat) REFERENCES chat(id) ON DELETE CASCADE,
+    CONSTRAINT fk_mensagem_remetente FOREIGN KEY (id_remetente) REFERENCES usuario(id) ON DELETE CASCADE
 );
